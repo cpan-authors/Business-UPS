@@ -5,6 +5,7 @@ WriteMakefile(
     AUTHOR              => 'Justin Wheeler <upsmodule@datademons.com>',
     VERSION_FROM        => 'lib/Business/UPS.pm',
     ABSTRACT_FROM       => 'lib/Business/UPS.pm',
+    MIN_PERL_VERSION    => '5.014',
     PL_FILES            => {},
     ($ExtUtils::MakeMaker::VERSION >= 6.3002 ? ('LICENSE'        => 'perl', ) : ()),
     PREREQ_PM => {
