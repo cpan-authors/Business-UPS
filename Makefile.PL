@@ -13,7 +13,7 @@ WriteMakefile(
 	'Test::More'     => 0,  # For testing
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean               => { FILES => 'Net-Business-UPS-*' },
+    clean               => { FILES => 'Business-UPS-*' },
     META_MERGE  => {
         build_requires => {
             'Test::More' => 0,  # For testing
