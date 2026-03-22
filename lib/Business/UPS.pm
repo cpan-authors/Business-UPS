@@ -5,7 +5,7 @@ use warnings;
 
 use LWP::UserAgent;
 use JSON::PP qw(decode_json encode_json);
-require 5.014;
+require 5.008;
 
 require Exporter;
 
