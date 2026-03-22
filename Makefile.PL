@@ -19,8 +19,8 @@ WriteMakefile(
         },
         resources => {
             license => 'http://dev.perl.org/licenses/',
-            bugtracker => 'https://github.com/toddr/Business-UPS/issues',
-            repository => 'https://github.com/toddr/Business-UPS',
+            bugtracker => 'https://github.com/cpan-authors/Business-UPS/issues',
+            repository => 'https://github.com/cpan-authors/Business-UPS',
         },
     },
     );
