@@ -9,6 +9,7 @@ WriteMakefile(
     ($ExtUtils::MakeMaker::VERSION >= 6.3002 ? ('LICENSE'        => 'perl', ) : ()),
     PREREQ_PM => {
         'LWP::UserAgent' => 0,
+        'JSON::PP'       => 0,
 	'Test::More'     => 0,  # For testing
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
