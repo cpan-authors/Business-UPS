@@ -5,11 +5,11 @@ use warnings;
 
 use LWP::UserAgent;
 use JSON::PP qw(decode_json encode_json);
-require 5.008;
+require 5.014;
 
 require Exporter;
 
-our @ISA = qw(Exporter AutoLoader);
+our @ISA = qw(Exporter);
 
 our @EXPORT = qw/ getUPS UPStrack /;
 
@@ -135,10 +135,6 @@ sub Error {
     my $error = shift;
     die "$error\n";
 }
-
-END { }
-
-# Autoload methods go after =cut, and are processed by the autosplit program.
 
 1;
 
