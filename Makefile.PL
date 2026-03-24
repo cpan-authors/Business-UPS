@@ -11,14 +11,13 @@ WriteMakefile(
     PREREQ_PM => {
         'LWP::UserAgent' => 0,
         'JSON::PP'       => 0,
-	'Test::More'     => 0,  # For testing
+    },
+    TEST_REQUIRES => {
+        'Test::More'     => 0,
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Business-UPS-*' },
     META_MERGE  => {
-        build_requires => {
-            'Test::More' => 0,  # For testing
-        },
         resources => {
             license => 'http://dev.perl.org/licenses/',
             bugtracker => 'https://github.com/cpan-authors/Business-UPS/issues',
