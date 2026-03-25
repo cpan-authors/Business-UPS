@@ -21,6 +21,11 @@ our $VERSION = '2.03';
 
 sub getUPS {
 
+    warnings::warnif( 'deprecated',
+        'getUPS() is deprecated: the UPS rate quoting endpoint (qcostcgi.cgi) '
+        . 'has been retired by UPS. This function will be removed in a future '
+        . 'release. See Business::UPS documentation for alternatives.' );
+
     my (
         $product, $origin, $dest,      $weight, $country, $rate_chart, $length,
         $width,   $height, $oversized, $cod
@@ -161,8 +166,17 @@ Business::UPS - A UPS Interface Module
 
 =head1 DESCRIPTION
 
-A way of sending four arguments to a module to get shipping charges 
+A way of sending four arguments to a module to get shipping charges
 that can be used in, say, a CGI.
+
+B<NOTE:> The C<getUPS()> function is B<deprecated>. The UPS rate quoting
+endpoint (C<qcostcgi.cgi>) it relied on has been permanently retired by UPS.
+Calls to C<getUPS()> will emit a deprecation warning and will always fail
+with an HTTP error. This function will be removed in a future release.
+
+For rate quoting, consider using L<Business::Shipping> or the
+L<UPS Rating API|https://developer.ups.com/api/reference?loc=en_US#tag/Rating_other>
+directly.
 
 =head1 REQUIREMENTS
 
@@ -185,7 +199,10 @@ JSON::PP (core since Perl 5.14)
 =back
 
 
-=head1 ARGUMENTS for getUPS()
+=head1 ARGUMENTS for getUPS() (DEPRECATED)
+
+B<This function is deprecated.> The UPS endpoint it uses no longer exists.
+See L</DESCRIPTION> for alternatives.
 
 Call the subroutine with the following values:
 

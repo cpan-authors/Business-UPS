@@ -3,6 +3,10 @@ use warnings;
 use Test::More;
 use Business::UPS;
 
+# Capture deprecation warnings
+my @warnings;
+$SIG{__WARN__} = sub { push @warnings, $_[0] };
+
 # Mock LWP::UserAgent to avoid real HTTP requests
 my @mock_responses;
 
@@ -33,7 +37,21 @@ my @mock_responses;
 my $success_response = 'UPSOnLine3%GNDCOM%23606%US%23607%US%002%50%7.50%0.25%7.75';
 my $error_response   = 'UPSOnLine3%GNDCOM%23606%US%00000%%0%50%0%0%0';
 
+subtest 'getUPS emits deprecation warning' => sub {
+    @warnings = ();
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $success_response ),
+    );
+
+    getUPS(qw/GNDCOM 23606 23607 50/);
+
+    is( scalar @warnings, 1, 'exactly one warning emitted' );
+    like( $warnings[0], qr/deprecated/i, 'warning mentions deprecation' );
+    like( $warnings[0], qr/qcostcgi/,    'warning mentions retired endpoint' );
+};
+
 subtest 'getUPS returns shipping cost and zone on success' => sub {
+    @warnings = ();
     @mock_responses = (
         MockResponse->new( success => 1, content => $success_response ),
     );
