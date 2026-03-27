@@ -23,5 +23,11 @@ WriteMakefile(
             bugtracker => 'https://github.com/cpan-authors/Business-UPS/issues',
             repository => 'https://github.com/cpan-authors/Business-UPS',
         },
+        provides => {
+            'Business::UPS' => {
+                file    => 'lib/Business/UPS.pm',
+                version => '2.03',
+            },
+        },
     },
     );
