@@ -436,6 +436,11 @@ This software was originally written by Mark Solomon <mailto:msoloman@seva.net> 
 NOTE: UPS is a registered trademark of United Parcel Service.  Due to UPS licensing, using this software is not
 be endorsed by UPS, and may not be allowed.  Use at your own risk.
 
+=head1 LICENSE
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.  See L<perlartistic> and L<perlgpl>.
+
 =head1 SEE ALSO
 
 perl(1).
