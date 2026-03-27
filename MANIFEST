@@ -1,5 +1,6 @@
 Changes
 country-codes.txt
+LICENSE
 examples/test.pl
 lib/Business/UPS.pm
 Makefile.PL
