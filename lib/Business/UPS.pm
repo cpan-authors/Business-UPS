@@ -107,7 +107,8 @@ sub UPStrack {
         $retValue{'Shipped To'} = join( ', ', @parts ) if @parts;
     }
 
-    $retValue{'Delivery Date'} = $track->{scheduledDeliveryDate} || $track->{deliveredDate};
+    my $delivery_date = $track->{scheduledDeliveryDate} || $track->{deliveredDate};
+    $retValue{'Delivery Date'} = $delivery_date if $delivery_date;
     $retValue{'Signed By'}     = $track->{receivedBy}  if $track->{receivedBy};
     $retValue{'Location'}      = $track->{leftAt}      if $track->{leftAt};
 

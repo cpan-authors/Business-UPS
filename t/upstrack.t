@@ -172,4 +172,89 @@ subtest 'UPStrack dies when trackDetails missing' => sub {
     like( $@, qr/tracking/i, 'dies on missing trackDetails' );
 };
 
+# Minimal response — only required fields present
+my $minimal_json = <<'JSON';
+{
+  "trackDetails": [
+    {
+      "trackingNumber": "1Z999AA10123456784",
+      "packageStatus": "Label Created"
+    }
+  ]
+}
+JSON
+
+subtest 'UPStrack handles minimal response (no optional fields)' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $minimal_json ),
+    );
+
+    my %result = UPStrack("1Z999AA10123456784");
+
+    is( $result{'Current Status'}, 'Label Created', 'status from minimal response' );
+    ok( !exists $result{'Service Type'},   'no service type when missing' );
+    ok( !exists $result{'Weight'},         'no weight when missing' );
+    ok( !exists $result{'Shipped To'},     'no shipped-to when missing' );
+    ok( !exists $result{'Delivery Date'},  'no delivery date when both dates missing' );
+    ok( !exists $result{'Signed By'},      'no signed-by when missing' );
+    ok( !exists $result{'Location'},       'no location when missing' );
+    is( $result{'Activity Count'}, 0,      'zero activities' );
+    is_deeply( $result{'Scanning'}, {},    'empty scanning hash' );
+};
+
+# Response with empty shipmentProgressActivities array
+my $empty_activities_json = <<'JSON';
+{
+  "trackDetails": [
+    {
+      "trackingNumber": "1Z999AA10123456784",
+      "packageStatus": "In Transit",
+      "service": "UPS Ground",
+      "scheduledDeliveryDate": "Monday, 01/20/2026",
+      "shipmentProgressActivities": []
+    }
+  ]
+}
+JSON
+
+subtest 'UPStrack handles empty activities array' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $empty_activities_json ),
+    );
+
+    my %result = UPStrack("1Z999AA10123456784");
+
+    is( $result{'Current Status'},  'In Transit',            'status present' );
+    is( $result{'Delivery Date'},   'Monday, 01/20/2026',    'scheduled delivery date' );
+    is( $result{'Activity Count'},  0,                       'zero activities from empty array' );
+    is_deeply( $result{'Scanning'}, {},                      'empty scanning hash' );
+};
+
+# Response with deliveredDate but no scheduledDeliveryDate
+my $delivered_only_date_json = <<'JSON';
+{
+  "trackDetails": [
+    {
+      "trackingNumber": "1Z999AA10123456784",
+      "packageStatus": "Delivered",
+      "deliveredDate": "Friday, 01/17/2026",
+      "shipToAddress": {
+        "city": "PORTLAND"
+      }
+    }
+  ]
+}
+JSON
+
+subtest 'UPStrack uses deliveredDate as fallback' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $delivered_only_date_json ),
+    );
+
+    my %result = UPStrack("1Z999AA10123456784");
+
+    is( $result{'Delivery Date'}, 'Friday, 01/17/2026', 'falls back to deliveredDate' );
+    is( $result{'Shipped To'},    'PORTLAND',            'partial address (city only)' );
+};
+
 done_testing();
