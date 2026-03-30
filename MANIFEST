@@ -1,6 +1,8 @@
 Changes
+CLAUDE.md
 CONTRIBUTING.md
 country-codes.txt
+cpanfile
 LICENSE
 examples/test.pl
 lib/Business/UPS.pm
