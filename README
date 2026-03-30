@@ -19,6 +19,15 @@ DESCRIPTION
     A way of sending four arguments to a module to get shipping charges that
     can be used in, say, a CGI.
 
+    NOTE: The getUPS() function is deprecated. The UPS rate quoting endpoint
+    ("qcostcgi.cgi") it relied on has been permanently retired by UPS. Calls
+    to getUPS() will emit a deprecation warning and will always fail with an
+    HTTP error. This function will be removed in a future release.
+
+    For rate quoting, consider using Business::Shipping or the UPS Rating
+    API <https://developer.ups.com/api/reference?loc=en_US#tag/Rating_other>
+    directly.
+
 REQUIREMENTS
     I've tried to keep this package to a minimum, so you'll need:
 
@@ -28,7 +37,10 @@ REQUIREMENTS
 
     *   JSON::PP (core since Perl 5.14)
 
-ARGUMENTS for getUPS()
+ARGUMENTS for getUPS() (DEPRECATED)
+    This function is deprecated. The UPS endpoint it uses no longer exists.
+    See "DESCRIPTION" for alternatives.
+
     Call the subroutine with the following values:
 
       1. Product code (see product-codes.txt)
@@ -225,6 +237,10 @@ AUTHOR
     NOTE: UPS is a registered trademark of United Parcel Service. Due to UPS
     licensing, using this software is not be endorsed by UPS, and may not be
     allowed. Use at your own risk.
+
+LICENSE
+    This module is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself. See perlartistic and perlgpl.
 
 SEE ALSO
     perl(1).

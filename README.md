@@ -1,3 +1,5 @@
+[![testsuite](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml)
+
 # NAME
 
 Business::UPS - A UPS Interface Module
@@ -11,25 +13,38 @@ Business::UPS - A UPS Interface Module
     print "Shipping is \$$shipping\n";
     print "UPS Zone is $ups_zone\n";
 
-    %track = UPStrack("z10192ixj29j39");
-    $track{error} and die "ERROR: $track{error}";
+    my %track = eval { UPStrack("1Z12345E0205271688") };
+    die "ERROR: $@" if $@;
 
-    # 'Delivered' or 'In-transit'
-    print "This package is $track{Current Status}\n"; 
+    # 'Delivered' or 'In Transit'
+    print "This package is $track{'Current Status'}\n";
 
 # DESCRIPTION
 
-A way of sending four arguments to a module to get shipping charges 
+A way of sending four arguments to a module to get shipping charges
 that can be used in, say, a CGI.
+
+**NOTE:** The `getUPS()` function is **deprecated**. The UPS rate quoting
+endpoint (`qcostcgi.cgi`) it relied on has been permanently retired by UPS.
+Calls to `getUPS()` will emit a deprecation warning and will always fail
+with an HTTP error. This function will be removed in a future release.
+
+For rate quoting, consider using [Business::Shipping](https://metacpan.org/pod/Business%3A%3AShipping) or the
+[UPS Rating API](https://developer.ups.com/api/reference?loc=en_US#tag/Rating_other)
+directly.
 
 # REQUIREMENTS
 
 I've tried to keep this package to a minimum, so you'll need:
 
-- Perl 5.003 or higher
-- LWP::UserAgent Module
+- Perl 5.014 or higher
+- LWP::UserAgent
+- JSON::PP (core since Perl 5.14)
 
-# ARGUMENTS for getUPS()
+# ARGUMENTS for getUPS() (DEPRECATED)
+
+**This function is deprecated.** The UPS endpoint it uses no longer exists.
+See ["DESCRIPTION"](#description) for alternatives.
 
 Call the subroutine with the following values:
 
@@ -42,11 +57,11 @@ and optionally:
 
     5.  Country Code, (see country-codes.txt)
     6.  Rate Chart (drop-off, pick-up, etc - see below)
-    6.  Length,
-    7.  Width,
-    8.  Height,
-    9.  Oversized (defined if oversized), and
-    10. COD (defined if C.O.D.)
+    7.  Length,
+    8.  Width,
+    9.  Height,
+    10. Oversized (defined if oversized), and
+    11. COD (defined if C.O.D.)
 
 1. Product Codes:
 
@@ -115,11 +130,12 @@ and optionally:
 
 # ARGUMENTS for UPStrack()
 
-The tracking number.
+The tracking number. Dies on error (use eval to catch).
 
     use Business::UPS;
-    %t = UPStrack("1ZX29W290250xxxxxx");
-    print "This package is $track{'Current Status'}\n";
+    my %t = eval { UPStrack("1ZX29W290250xxxxxx") };
+    die "ERROR: $@" if $@;
+    print "This package is $t{'Current Status'}\n";
 
 # RETURN VALUES
 
@@ -143,18 +159,18 @@ The tracking number.
 
 - UPStrack()
 
-    The hash that's returned is like the following:
+    The hash that's returned contains the following keys:
 
-        'Last Updated'        => 'Jun 10 2003 12:28 P.M.'
-        'Shipped On'          => 'June 9, 2003'
-        'Signed By'           => 'SIGNATURE'
-        'Shipped To'          => 'LOS ANGELES,CA,US'
-        'Scanning'            => HASH(0x146e0c) (more later...)
-        'Activity Count'      => 5
-        'Weight'              => '16.00 Lbs'
-        'Current Status'      => 'Delivered'
-        'Location'            => 'RESIDENTIAL'
-        'Service Type'        => 'STANDARD'
+        'Current Status'  => 'Delivered'         # or 'In Transit'
+        'Service Type'    => 'UPS Ground'
+        'Weight'          => '5.00 LBS'
+        'Shipped To'      => 'ANYTOWN, CA, US'
+        'Delivery Date'   => 'Wednesday, 01/14/2026'
+        'Signed By'       => 'SMITH'             # if delivered
+        'Location'        => 'Front Door'        # if delivered
+        'Activity Count'  => 3
+        'Scanning'        => HASH(0x...)         # see below
+        'Notice'          => 'UPS authorizes...'
 
     Notice the key 'Scanning' is a reference to a hash.
     (Which is a reference to another hash.)
@@ -164,17 +180,17 @@ The tracking number.
     an activity that's happened to an item.  (See example for
     details)
 
-        %hash{Scanning}{1}{'location'} = 'MESQUITE,TX,US';
-        %hash{Scanning}{1}{'date'} = 'Jun 10, 2003';
-        %hash{Scanning}{1}{'time'} = '12:55 A.M.';
-        %hash{Scanning}{1}{'activity'} = 'ARRIVAL SCAN';
-        %hash{Scanning}{2}{'location'} = 'MESQUITE,TX,US';
-        .
-        .
-        .
-        %hash{Scanning}{x}{'activity'} = 'DELIVERED';
+        $hash{Scanning}{1}{'location'} = 'ANYTOWN, CA, US';
+        $hash{Scanning}{1}{'date'} = 'January 14, 2026';
+        $hash{Scanning}{1}{'time'} = '11:57 A.M.';
+        $hash{Scanning}{1}{'activity'} = 'Delivered';
+        $hash{Scanning}{2}{'location'} = 'ANYTOWN, CA, US';
+        ...
 
     NOTE: The items generally go in reverse chronological order.
+
+    Dies on error (HTTP failure, invalid JSON, missing tracking data).
+    Use eval {} to catch errors.
 
 # EXAMPLE
 
@@ -198,26 +214,26 @@ The tracking number.
 
         use Business::UPS;
 
-        %t = UPStrack("z10192ixj29j39");
-        $t{error} and die "ERROR: $t{error}";
-              
-        print "This package is $t{'Current Status'}\n"; # 'Delivered' or 
-                                                        # 'In-transit'
+        my %t = eval { UPStrack("1Z12345E0205271688") };
+        die "ERROR: $@" if $@;
+
+        print "This package is $t{'Current Status'}\n"; # 'Delivered' or
+                                                        # 'In Transit'
         print "More info:\n";
-        foreach $key (keys %t) {
+        foreach my $key (keys %t) {
           print "KEY: $key = $t{$key}\n";
         }
 
-        %activities = %{$t{'Scanning'}};
+        my %activities = %{$t{'Scanning'}};
 
         print "Package activity:\n";
         for (my $num = $t{'Activity Count'}; $num > 0; $num--)
         {
-              print "-- ITEM $num --\n";
-              foreach $newkey (keys %{$activities{$num}})
-              {
-                      print "$newkey: $activities{$num}{$newkey}\n";
-              }
+          print "-- ITEM $num --\n";
+          foreach my $newkey (keys %{$activities{$num}})
+          {
+            print "$newkey: $activities{$num}{$newkey}\n";
+          }
         }
 
 # BUGS
@@ -235,14 +251,11 @@ This software was originally written by Mark Solomon <mailto:msoloman@seva.net> 
 NOTE: UPS is a registered trademark of United Parcel Service.  Due to UPS licensing, using this software is not
 be endorsed by UPS, and may not be allowed.  Use at your own risk.
 
+# LICENSE
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.  See [perlartistic](https://metacpan.org/pod/perlartistic) and [perlgpl](https://metacpan.org/pod/perlgpl).
+
 # SEE ALSO
 
 perl(1).
-
-# POD ERRORS
-
-Hey! **The above document had some coding errors, which are explained below:**
-
-- Around line 253:
-
-    &#x3d;back doesn't take any parameters, but you said =back 4
