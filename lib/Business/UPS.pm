@@ -3,6 +3,7 @@ package Business::UPS;
 use strict;
 use warnings;
 
+use Carp;
 use LWP::UserAgent;
 use JSON::PP qw(decode_json encode_json);
 require 5.014;
@@ -53,7 +54,7 @@ sub getUPS {
     my $lwp    = LWP::UserAgent->new();
     my $result = $lwp->get($workString);
 
-    Error("Failed fetching data.") unless $result->is_success;
+    croak("Failed fetching data.") unless $result->is_success;
 
     my @ret = split( '%', $result->content );
 
@@ -74,7 +75,7 @@ sub UPStrack {
     my $tracking_number = shift;
     my %retValue;
 
-    $tracking_number || Error("No tracking number provided to UPStrack()");
+    $tracking_number || croak("No tracking number provided to UPStrack()");
 
     my $ups_url = 'https://www.ups.com/track/api/Track/GetStatus?loc=en_US';
     my $payload = encode_json( {
@@ -89,14 +90,14 @@ sub UPStrack {
         Content        => $payload,
     );
 
-    Error("Cannot get tracking data from UPS") unless $result->is_success();
+    croak("Cannot get tracking data from UPS") unless $result->is_success();
 
     my $json;
     eval { $json = decode_json( $result->content() ) };
-    Error("Cannot parse JSON response from UPS: $@") if $@;
+    croak("Cannot parse JSON response from UPS: $@") if $@;
 
     my $details = $json->{trackDetails};
-    Error("No tracking details returned from UPS") unless $details && ref($details) eq 'ARRAY' && @$details;
+    croak("No tracking details returned from UPS") unless $details && ref($details) eq 'ARRAY' && @$details;
 
     my $track = $details->[0];
 
@@ -135,11 +136,6 @@ sub UPStrack {
     $retValue{'Notice'}         = "UPS authorizes you to use UPS tracking systems solely to track shipments tendered by or for you to UPS for delivery and for no other purpose. Any other use of UPS tracking systems and information is strictly prohibited.";
 
     return %retValue;
-}
-
-sub Error {
-    my $error = shift;
-    die "$error\n";
 }
 
 1;
@@ -379,7 +375,7 @@ Use eval {} to catch errors.
 
 =item getUPS()
 
-To retreive the shipping of a 'Ground Commercial' Package 
+To retrieve the shipping of a 'Ground Commercial' Package
 weighing 25lbs. sent from 23001 to 24002 this package would 
 be called like this:
 
@@ -423,15 +419,14 @@ be called like this:
 
 =head1 BUGS
 
-Probably lots.  Contact me if you find them.
+Please report bugs via the GitHub issue tracker at
+L<https://github.com/cpan-authors/Business-UPS/issues>.
 
 =head1 AUTHOR
 
 Justin Wheeler <upsmodule@datademons.com>
 
-mailto:upsmodule@datademons.com
-
-This software was originally written by Mark Solomon <mailto:msoloman@seva.net> (http://www.seva.net/~msolomon/)
+Originally written by Mark Solomon.
 
 NOTE: UPS is a registered trademark of United Parcel Service.  Due to UPS licensing, using this software is not
 be endorsed by UPS, and may not be allowed.  Use at your own risk.
