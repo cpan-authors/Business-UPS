@@ -149,6 +149,8 @@ sub Error {
 
 __END__
 
+=for markdown [![testsuite](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml)
+
 =head1 NAME
 
 Business::UPS - A UPS Interface Module
