@@ -3,7 +3,8 @@
 use strict;
 use warnings;
 
-use lib '.';
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use Business::UPS;
 
 print "UPS Version " . $Business::UPS::VERSION . "\n\n";
