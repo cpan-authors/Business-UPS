@@ -1,14 +1,14 @@
+AI_POLICY.md
 Changes
 CONTRIBUTING.md
 country-codes.txt
-LICENSE
 examples/test.pl
 lib/Business/UPS.pm
+LICENSE
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 product-codes.txt
-README.md
 SECURITY.md
 t/00-load.t
 t/getups.t
