@@ -56,11 +56,10 @@ Single-file module (`lib/Business/UPS.pm`), procedural design, two exported func
 
 ## CPAN distribution rules
 
-- **MANIFEST** must be updated when adding files to the distribution root
-- **Changes** follows the existing format (version, date, categorized bullet points)
+- **MANIFEST** is generated — run `make manifest` to regenerate it. Do not manually edit or sort this file.
+- **README.md** is generated — run `pod2markdown lib/Business/UPS.pm > README.md` to regenerate from POD. Do not edit README.md directly.
+- **Releases are human-only** — never update `Changes` or bump `$VERSION`. The maintainer handles versioning and changelog entries.
 - **Version** lives in `$VERSION` in `lib/Business/UPS.pm` — `VERSION_FROM` in Makefile.PL reads it
-- Do not hardcode version numbers elsewhere when avoidable
-- Both `README` (plain text, for CPAN) and `README.md` (markdown, for GitHub) should be regenerated when POD changes using `pod2markdown`
 - Use `=for markdown` directive in POD for content that should only appear in markdown output (e.g., CI badges)
 
 ## CI
