@@ -1,0 +1,261 @@
+[![testsuite](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml)
+
+# NAME
+
+Business::UPS - A UPS Interface Module
+
+# SYNOPSIS
+
+    use Business::UPS;
+
+    my ($shipping,$ups_zone,$error) = getUPS(qw/GNDCOM 23606 23607 50/);
+    $error and die "ERROR: $error\n";
+    print "Shipping is \$$shipping\n";
+    print "UPS Zone is $ups_zone\n";
+
+    my %track = eval { UPStrack("1Z12345E0205271688") };
+    die "ERROR: $@" if $@;
+
+    # 'Delivered' or 'In Transit'
+    print "This package is $track{'Current Status'}\n";
+
+# DESCRIPTION
+
+A way of sending four arguments to a module to get shipping charges
+that can be used in, say, a CGI.
+
+**NOTE:** The `getUPS()` function is **deprecated**. The UPS rate quoting
+endpoint (`qcostcgi.cgi`) it relied on has been permanently retired by UPS.
+Calls to `getUPS()` will emit a deprecation warning and will always fail
+with an HTTP error. This function will be removed in a future release.
+
+For rate quoting, consider using [Business::Shipping](https://metacpan.org/pod/Business%3A%3AShipping) or the
+[UPS Rating API](https://developer.ups.com/api/reference?loc=en_US#tag/Rating_other)
+directly.
+
+# REQUIREMENTS
+
+I've tried to keep this package to a minimum, so you'll need:
+
+- Perl 5.014 or higher
+- LWP::UserAgent
+- JSON::PP (core since Perl 5.14)
+
+# ARGUMENTS for getUPS() (DEPRECATED)
+
+**This function is deprecated.** The UPS endpoint it uses no longer exists.
+See ["DESCRIPTION"](#description) for alternatives.
+
+Call the subroutine with the following values:
+
+    1. Product code (see product-codes.txt)
+    2. Origin Zip Code
+    3. Destination Zip Code
+    4. Weight of Package
+
+and optionally:
+
+    5.  Country Code, (see country-codes.txt)
+    6.  Rate Chart (drop-off, pick-up, etc - see below)
+    7.  Length,
+    8.  Width,
+    9.  Height,
+    10. Oversized (defined if oversized), and
+    11. COD (defined if C.O.D.)
+
+1. Product Codes:
+
+        1DM           Next Day Air Early AM
+        1DML          Next Day Air Early AM Letter
+        1DA           Next Day Air
+        1DAL          Next Day Air Letter
+        1DP           Next Day Air Saver
+        1DPL          Next Day Air Saver Letter
+        2DM           2nd Day Air A.M.
+        2DA           2nd Day Air
+        2DML          2nd Day Air A.M. Letter
+        2DAL          2nd Day Air Letter
+        3DS           3 Day Select
+        GNDCOM        Ground Commercial
+        GNDRES        Ground Residential
+        XPR           Worldwide Express
+        XDM           Worldwide Express Plus
+        XPRL          Worldwide Express Letter
+        XDML          Worldwide Express Plus Letter
+        XPD           Worldwide Expedited
+
+    In an HTML "option" input it might look like this:
+
+        <OPTION VALUE="1DM">Next Day Air Early AM
+        <OPTION VALUE="1DML">Next Day Air Early AM Letter
+        <OPTION SELECTED VALUE="1DA">Next Day Air
+        <OPTION VALUE="1DAL">Next Day Air Letter
+        <OPTION VALUE="1DP">Next Day Air Saver
+        <OPTION VALUE="1DPL">Next Day Air Saver Letter
+        <OPTION VALUE="2DM">2nd Day Air A.M.
+        <OPTION VALUE="2DA">2nd Day Air
+        <OPTION VALUE="2DML">2nd Day Air A.M. Letter
+        <OPTION VALUE="2DAL">2nd Day Air Letter
+        <OPTION VALUE="3DS">3 Day Select
+        <OPTION VALUE="GNDCOM">Ground Commercial
+        <OPTION VALUE="GNDRES">Ground Residential
+
+2. Origin Zip(tm) Code
+
+    Origin Zip Code as a number or string (NOT +4 Format)
+
+3. Destination Zip(tm) Code
+
+    Destination Zip Code as a number or string (NOT +4 Format)
+
+4. Weight
+
+    Weight of the package in pounds
+
+5. Country
+
+    Defaults to US
+
+6. Rate Chart
+
+    How does the package get to UPS:
+
+    Can be one of the following:
+
+        Regular Daily Pickup
+        On Call Air
+        One Time Pickup
+        Letter Center
+        Customer Counter
+
+# ARGUMENTS for UPStrack()
+
+The tracking number. Dies on error (use eval to catch).
+
+    use Business::UPS;
+    my %t = eval { UPStrack("1ZX29W290250xxxxxx") };
+    die "ERROR: $@" if $@;
+    print "This package is $t{'Current Status'}\n";
+
+# RETURN VALUES
+
+- getUPS()
+
+            The raw LWP::UserAgent get returns a list with the following values:
+
+              ##  Desc              Typical Value
+              --  ---------------   -------------
+              0.  Name of server:   UPSOnLine3
+              1.  Product code:     GNDCOM
+              2.  Orig Postal:      23606
+              3.  Country:          US
+              4.  Dest Postal:      23607
+              5.  Country:          US
+              6.  Shipping Zone:    002
+              7.  Weight (lbs):     50
+              8.  Sub-total Cost:   7.75
+              9.  Addt'l Chrgs:     0.00
+              10. Total Cost:       7.75
+
+- UPStrack()
+
+    The hash that's returned contains the following keys:
+
+        'Current Status'  => 'Delivered'         # or 'In Transit'
+        'Service Type'    => 'UPS Ground'
+        'Weight'          => '5.00 LBS'
+        'Shipped To'      => 'ANYTOWN, CA, US'
+        'Delivery Date'   => 'Wednesday, 01/14/2026'
+        'Signed By'       => 'SMITH'             # if delivered
+        'Location'        => 'Front Door'        # if delivered
+        'Activity Count'  => 3
+        'Scanning'        => HASH(0x...)         # see below
+        'Notice'          => 'UPS authorizes...'
+
+    Notice the key 'Scanning' is a reference to a hash.
+    (Which is a reference to another hash.)
+
+    Scanning will contain a hash with keys 1 .. (Activity Count)
+    Each of those values is another hash, holding a reference to
+    an activity that's happened to an item.  (See example for
+    details)
+
+        $hash{Scanning}{1}{'location'} = 'ANYTOWN, CA, US';
+        $hash{Scanning}{1}{'date'} = 'January 14, 2026';
+        $hash{Scanning}{1}{'time'} = '11:57 A.M.';
+        $hash{Scanning}{1}{'activity'} = 'Delivered';
+        $hash{Scanning}{2}{'location'} = 'ANYTOWN, CA, US';
+        ...
+
+    NOTE: The items generally go in reverse chronological order.
+
+    Dies on error (HTTP failure, invalid JSON, missing tracking data).
+    Use eval {} to catch errors.
+
+# EXAMPLE
+
+- getUPS()
+
+    To retreive the shipping of a 'Ground Commercial' Package 
+    weighing 25lbs. sent from 23001 to 24002 this package would 
+    be called like this:
+
+        #!/usr/local/bin/perl
+        use Business::UPS;
+
+        my ($shipping,$ups_zone,$error) = getUPS(qw/GNDCOM 23001 23002 25/);
+        $error and die "ERROR: $error\n";
+        print "Shipping is \$$shipping\n";
+        print "UPS Zone is $ups_zone\n";
+
+- UPStrack()
+
+        #!/usr/local/bin/perl
+
+        use Business::UPS;
+
+        my %t = eval { UPStrack("1Z12345E0205271688") };
+        die "ERROR: $@" if $@;
+
+        print "This package is $t{'Current Status'}\n"; # 'Delivered' or
+                                                        # 'In Transit'
+        print "More info:\n";
+        foreach my $key (keys %t) {
+          print "KEY: $key = $t{$key}\n";
+        }
+
+        my %activities = %{$t{'Scanning'}};
+
+        print "Package activity:\n";
+        for (my $num = $t{'Activity Count'}; $num > 0; $num--)
+        {
+          print "-- ITEM $num --\n";
+          foreach my $newkey (keys %{$activities{$num}})
+          {
+            print "$newkey: $activities{$num}{$newkey}\n";
+          }
+        }
+
+# BUGS
+
+Probably lots.  Contact me if you find them.
+
+# AUTHOR
+
+Justin Wheeler <upsmodule@datademons.com>
+
+mailto:upsmodule@datademons.com
+
+This software was originally written by Mark Solomon <mailto:msoloman@seva.net> (http://www.seva.net/~msolomon/)
+
+NOTE: UPS is a registered trademark of United Parcel Service.  Due to UPS licensing, using this software is not
+be endorsed by UPS, and may not be allowed.  Use at your own risk.
+
+# LICENSE
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.  See [perlartistic](https://metacpan.org/pod/perlartistic) and [perlgpl](https://metacpan.org/pod/perlgpl).
+
+# SEE ALSO
+
+perl(1).

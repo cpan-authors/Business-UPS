@@ -18,10 +18,27 @@ WriteMakefile(
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'Business-UPS-*' },
     META_MERGE  => {
+        'meta-spec' => { version => 2 },
         resources => {
-            license => 'http://dev.perl.org/licenses/',
-            bugtracker => 'https://github.com/cpan-authors/Business-UPS/issues',
-            repository => 'https://github.com/cpan-authors/Business-UPS',
+            license    => ['http://dev.perl.org/licenses/'],
+            bugtracker => { web => 'https://github.com/cpan-authors/Business-UPS/issues' },
+            repository => {
+                type => 'git',
+                url  => 'https://github.com/cpan-authors/Business-UPS.git',
+                web  => 'https://github.com/cpan-authors/Business-UPS',
+            },
+        },
+        provides => {
+            'Business::UPS' => {
+                file    => 'lib/Business/UPS.pm',
+                version => MM->parse_version('lib/Business/UPS.pm'),
+            },
+        },
+        provides => {
+            'Business::UPS' => {
+                file    => 'lib/Business/UPS.pm',
+                version => MM->parse_version('lib/Business/UPS.pm'),
+            },
         },
     },
     );

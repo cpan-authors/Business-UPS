@@ -104,7 +104,10 @@ sub UPStrack {
     $retValue{'Service Type'}   = $track->{service}        if $track->{service};
 
     if ( my $w = $track->{weight} ) {
-        $retValue{'Weight'} = "$w->{weight} $w->{unitOfMeasurement}" if $w->{weight};
+        if ( $w->{weight} ) {
+            my $unit = $w->{unitOfMeasurement} || '';
+            $retValue{'Weight'} = length($unit) ? "$w->{weight} $unit" : $w->{weight};
+        }
     }
 
     if ( my $addr = $track->{shipToAddress} ) {
@@ -145,6 +148,8 @@ sub Error {
 1;
 
 __END__
+
+=for markdown [![testsuite](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml/badge.svg)](https://github.com/cpan-authors/Business-UPS/actions/workflows/testsuite.yml)
 
 =head1 NAME
 
