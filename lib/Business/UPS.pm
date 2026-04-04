@@ -6,11 +6,8 @@ use warnings;
 use Carp;
 use LWP::UserAgent;
 use JSON::PP qw(decode_json encode_json);
-require 5.014;
-
-require Exporter;
-
-our @ISA = qw(Exporter);
+use Exporter 'import';
+use 5.014;
 
 our @EXPORT = qw/ getUPS UPStrack /;
 

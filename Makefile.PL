@@ -34,11 +34,5 @@ WriteMakefile(
                 version => MM->parse_version('lib/Business/UPS.pm'),
             },
         },
-        provides => {
-            'Business::UPS' => {
-                file    => 'lib/Business/UPS.pm',
-                version => MM->parse_version('lib/Business/UPS.pm'),
-            },
-        },
     },
     );
