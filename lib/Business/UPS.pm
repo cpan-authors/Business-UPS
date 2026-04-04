@@ -50,7 +50,10 @@ sub getUPS {
     $workString .= "&30_cod=1"                     if $cod;
     $workString = "${ups_cgi}${workString}";
 
-    my $lwp    = LWP::UserAgent->new();
+    my $lwp    = LWP::UserAgent->new(
+        agent   => "Business-UPS/$VERSION",
+        timeout => 30,
+    );
     my $result = $lwp->get($workString);
 
     Error("Failed fetching data.") unless $result->is_success;
@@ -82,7 +85,10 @@ sub UPStrack {
         TrackingNumber => [$tracking_number],
     } );
 
-    my $lwp = LWP::UserAgent->new();
+    my $lwp = LWP::UserAgent->new(
+        agent   => "Business-UPS/$VERSION",
+        timeout => 30,
+    );
     my $result = $lwp->post(
         $ups_url,
         'Content-Type' => 'application/json',
