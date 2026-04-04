@@ -15,7 +15,7 @@ our @EXPORT = qw/ getUPS UPStrack /;
 #	Copyright 1998 Mark Solomon <msolomon@seva.net> (See GNU GPL)
 #	Started 01/07/1998 Mark Solomon
 
-our $VERSION = '2.03';
+our $VERSION = '2.04';
 
 sub getUPS {
 

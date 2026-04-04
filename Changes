@@ -1,5 +1,44 @@
 Revision history for Perl extension Business::UPS
 
+2.04 2026-04-03
+
+ Bug Fixes:
+ - Fix UPStrack() to only set 'Delivery Date' when a date actually exists
+   in the API response — callers can now rely on exists to check
+   availability. GH #10
+ - Fix uninitialized value warning in UPStrack() when the API returns a
+   weight hash without a unitOfMeasurement field. PR #26
+ - Fix MANIFEST.SKIP regex issues: remove cpanfile exclusion conflict,
+   anchor patterns properly, add exclusions for generated files. PR #26
+ - Fix duplicate 'provides' key in META_MERGE that caused the second
+   entry to silently overwrite the first. PR #28
+
+ Improvements:
+ - Deprecate getUPS() with a warnings::warnif('deprecated', ...) message.
+   The UPS rate quoting endpoint (qcostcgi.cgi) has been retired. GH #7,
+   PR #8
+ - Replace custom Error() subroutine with Carp::croak for proper
+   caller-side error reporting with file/line context. PR #23
+ - Set a 30-second timeout and Business-UPS/$VERSION user-agent string on
+   all LWP::UserAgent requests to prevent indefinite hangs. PR #30
+ - Update examples/test.pl to demonstrate UPStrack() instead of the
+   non-functional getUPS(). PR #9
+ - Add author tests (AUTHOR_TESTING) for POD validity and POD
+   coverage. PR #24
+ - Add edge case tests for UPStrack: weight without unit, empty address,
+   empty trackDetails, partial activities, undef tracking number. PR #26
+
+ Maintenance:
+ - Update all documentation and POD to match v2.03 JSON API changes. PR #6
+ - Modernize Exporter usage: use Exporter 'import' instead of @ISA
+   manipulation. PR #28
+ - Upgrade META_MERGE to CPAN META spec 2.0 with proper bugtracker,
+   repository, and provides metadata. PR #21, PR #25
+ - Move Test::More from PREREQ_PM to TEST_REQUIRES. PR #6
+ - Add LICENSE file, LICENSE section to POD. PR #11, PR #12
+ - Add SECURITY.md and CONTRIBUTING.md. PR #14, PR #15
+ - Add CLAUDE.md and AI_POLICY.md project documentation. PR #19
+
 2.03 2026-03-22
 
  Bug Fixes:
