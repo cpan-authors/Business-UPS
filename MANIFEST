@@ -13,4 +13,6 @@ product-codes.txt
 SECURITY.md
 t/00-load.t
 t/getups.t
+t/pod-coverage.t
+t/pod.t
 t/upstrack.t
