@@ -196,7 +196,7 @@ The tracking number. Dies on error (use eval to catch).
 
 - getUPS()
 
-    To retreive the shipping of a 'Ground Commercial' Package 
+    To retrieve the shipping of a 'Ground Commercial' Package
     weighing 25lbs. sent from 23001 to 24002 this package would 
     be called like this:
 
@@ -238,15 +238,14 @@ The tracking number. Dies on error (use eval to catch).
 
 # BUGS
 
-Probably lots.  Contact me if you find them.
+Please report bugs via the GitHub issue tracker at
+[https://github.com/cpan-authors/Business-UPS/issues](https://github.com/cpan-authors/Business-UPS/issues).
 
 # AUTHOR
 
 Justin Wheeler <upsmodule@datademons.com>
 
-mailto:upsmodule@datademons.com
-
-This software was originally written by Mark Solomon <mailto:msoloman@seva.net> (http://www.seva.net/~msolomon/)
+Originally written by Mark Solomon.
 
 NOTE: UPS is a registered trademark of United Parcel Service.  Due to UPS licensing, using this software is not
 be endorsed by UPS, and may not be allowed.  Use at your own risk.
