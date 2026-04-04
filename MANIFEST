@@ -1,6 +1,5 @@
 AI_POLICY.md
 Changes
-CLAUDE.md
 CONTRIBUTING.md
 country-codes.txt
 examples/test.pl
@@ -10,6 +9,7 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 product-codes.txt
+README
 SECURITY.md
 t/00-load.t
 t/getups.t
