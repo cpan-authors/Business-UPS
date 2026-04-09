@@ -384,4 +384,80 @@ subtest 'UPStrack dies on undef tracking number' => sub {
     like( $@, qr/tracking/i, 'dies on undef tracking number' );
 };
 
+# UPS API-level error response (top-level statusCode)
+my $api_error_json = <<'JSON';
+{
+  "statusCode": "429",
+  "statusText": "Rate limit exceeded"
+}
+JSON
+
+subtest 'UPStrack dies with UPS API error details' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $api_error_json ),
+    );
+
+    eval { UPStrack("1Z12345E0205271688") };
+    like( $@, qr/UPS API error/,        'identifies API-level error' );
+    like( $@, qr/429/,                  'includes status code' );
+    like( $@, qr/Rate limit exceeded/,  'includes status text' );
+};
+
+# UPS API-level error with missing statusText
+my $api_error_no_text_json = '{"statusCode": "500"}';
+
+subtest 'UPStrack handles API error with missing statusText' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $api_error_no_text_json ),
+    );
+
+    eval { UPStrack("1Z12345E0205271688") };
+    like( $@, qr/UPS API error.*500/,   'includes status code' );
+    like( $@, qr/Unknown error/,        'falls back to unknown error' );
+};
+
+# Tracking-level error (errorCode inside trackDetails)
+my $tracking_error_json = <<'JSON';
+{
+  "trackDetails": [
+    {
+      "errorCode": "TW0001",
+      "errorText": "Invalid tracking number"
+    }
+  ]
+}
+JSON
+
+subtest 'UPStrack dies with tracking-level error details' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $tracking_error_json ),
+    );
+
+    eval { UPStrack("INVALID123") };
+    like( $@, qr/UPS tracking error/,       'identifies tracking-level error' );
+    like( $@, qr/TW0001/,                   'includes error code' );
+    like( $@, qr/Invalid tracking number/,  'includes error text' );
+};
+
+# Tracking-level error with missing errorText
+my $tracking_error_no_text_json = <<'JSON';
+{
+  "trackDetails": [
+    {
+      "errorCode": "TW9999"
+    }
+  ]
+}
+JSON
+
+subtest 'UPStrack handles tracking error with missing errorText' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $tracking_error_no_text_json ),
+    );
+
+    eval { UPStrack("INVALID123") };
+    like( $@, qr/UPS tracking error.*TW9999/, 'includes error code' );
+    like( $@, qr/Unknown tracking error/,     'falls back to unknown tracking error' );
+};
+
 done_testing();

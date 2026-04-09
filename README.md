@@ -189,7 +189,9 @@ The tracking number. Dies on error (use eval to catch).
 
     NOTE: The items generally go in reverse chronological order.
 
-    Dies on error (HTTP failure, invalid JSON, missing tracking data).
+    Dies on error (HTTP failure, invalid JSON, missing tracking data,
+    UPS API errors, or invalid tracking numbers). When UPS returns an error
+    response, the error message includes the UPS error code and description.
     Use eval {} to catch errors.
 
 # EXAMPLE

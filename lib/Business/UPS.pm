@@ -99,10 +99,22 @@ sub UPStrack {
     eval { $json = decode_json( $result->content() ) };
     croak("Cannot parse JSON response from UPS: $@") if $@;
 
+    # Check for top-level API errors (e.g., rate limiting, service unavailable)
+    if ( my $status_code = $json->{statusCode} ) {
+        my $status_text = $json->{statusText} || 'Unknown error';
+        croak("UPS API error ($status_code): $status_text");
+    }
+
     my $details = $json->{trackDetails};
     croak("No tracking details returned from UPS") unless $details && ref($details) eq 'ARRAY' && @$details;
 
     my $track = $details->[0];
+
+    # Check for tracking-level errors (e.g., invalid tracking number)
+    if ( my $error_code = $track->{errorCode} ) {
+        my $error_text = $track->{errorText} || 'Unknown tracking error';
+        croak("UPS tracking error ($error_code): $error_text");
+    }
 
     $retValue{'Current Status'} = $track->{packageStatus} if $track->{packageStatus};
     $retValue{'Service Type'}   = $track->{service}        if $track->{service};
@@ -372,7 +384,9 @@ details)
 
 NOTE: The items generally go in reverse chronological order.
 
-Dies on error (HTTP failure, invalid JSON, missing tracking data).
+Dies on error (HTTP failure, invalid JSON, missing tracking data,
+UPS API errors, or invalid tracking numbers). When UPS returns an error
+response, the error message includes the UPS error code and description.
 Use eval {} to catch errors.
 
 =back
