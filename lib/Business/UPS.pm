@@ -152,32 +152,28 @@ __END__
 
 =head1 NAME
 
-Business::UPS - A UPS Interface Module
+Business::UPS - Track UPS shipments and query shipping rates
 
 =head1 SYNOPSIS
 
   use Business::UPS;
 
-  my ($shipping,$ups_zone,$error) = getUPS(qw/GNDCOM 23606 23607 50/);
-  $error and die "ERROR: $error\n";
-  print "Shipping is \$$shipping\n";
-  print "UPS Zone is $ups_zone\n";
-
+  # Track a package
   my %track = eval { UPStrack("1Z12345E0205271688") };
   die "ERROR: $@" if $@;
-
-  # 'Delivered' or 'In Transit'
-  print "This package is $track{'Current Status'}\n";
+  print "This package is $track{'Current Status'}\n";  # 'Delivered' or 'In Transit'
 
 =head1 DESCRIPTION
 
-A way of sending four arguments to a module to get shipping charges
-that can be used in, say, a CGI.
+A Perl interface for tracking UPS shipments. The main function,
+C<UPStrack()>, queries the UPS tracking API and returns package status,
+delivery details, and shipment activity history.
 
-B<NOTE:> The C<getUPS()> function is B<deprecated>. The UPS rate quoting
-endpoint (C<qcostcgi.cgi>) it relied on has been permanently retired by UPS.
-Calls to C<getUPS()> will emit a deprecation warning and will always fail
-with an HTTP error. This function will be removed in a future release.
+B<NOTE:> This module also includes a C<getUPS()> function for rate quoting,
+which is B<deprecated>. The UPS rate quoting endpoint (C<qcostcgi.cgi>) it
+relied on has been permanently retired by UPS. Calls to C<getUPS()> will
+emit a deprecation warning and will always fail with an HTTP error. This
+function will be removed in a future release.
 
 For rate quoting, consider using L<Business::Shipping> or the
 L<UPS Rating API|https://developer.ups.com/api/reference?loc=en_US#tag/Rating_other>
@@ -322,24 +318,6 @@ The tracking number. Dies on error (use eval to catch).
 
 =over 4
 
-=item getUPS()
-
-	The raw LWP::UserAgent get returns a list with the following values:
-
-	  ##  Desc		Typical Value
-	  --  ---------------   -------------
-	  0.  Name of server: 	UPSOnLine3
-	  1.  Product code:	GNDCOM
-	  2.  Orig Postal:	23606
-	  3.  Country:		US
-	  4.  Dest Postal:	23607
-	  5.  Country:		US
-	  6.  Shipping Zone:	002
-	  7.  Weight (lbs):	50
-	  8.  Sub-total Cost:	7.75
-	  9.  Addt'l Chrgs:	0.00
-	  10. Total Cost:	7.75
-
 =item UPStrack()
 
 The hash that's returned contains the following keys:
@@ -375,25 +353,29 @@ NOTE: The items generally go in reverse chronological order.
 Dies on error (HTTP failure, invalid JSON, missing tracking data).
 Use eval {} to catch errors.
 
+=item getUPS() (DEPRECATED)
+
+The raw LWP::UserAgent get returns a list with the following values:
+
+	  ##  Desc		Typical Value
+	  --  ---------------   -------------
+	  0.  Name of server: 	UPSOnLine3
+	  1.  Product code:	GNDCOM
+	  2.  Orig Postal:	23606
+	  3.  Country:		US
+	  4.  Dest Postal:	23607
+	  5.  Country:		US
+	  6.  Shipping Zone:	002
+	  7.  Weight (lbs):	50
+	  8.  Sub-total Cost:	7.75
+	  9.  Addt'l Chrgs:	0.00
+	  10. Total Cost:	7.75
+
 =back
 
 =head1 EXAMPLE
 
 =over 4
-
-=item getUPS()
-
-To retrieve the shipping of a 'Ground Commercial' Package
-weighing 25lbs. sent from 23001 to 24002 this package would 
-be called like this:
-
-  #!/usr/local/bin/perl
-  use Business::UPS;
-
-  my ($shipping,$ups_zone,$error) = getUPS(qw/GNDCOM 23001 23002 25/);
-  $error and die "ERROR: $error\n";
-  print "Shipping is \$$shipping\n";
-  print "UPS Zone is $ups_zone\n";
 
 =item UPStrack()
 
@@ -422,6 +404,20 @@ be called like this:
       print "$newkey: $activities{$num}{$newkey}\n";
     }
   }
+
+=item getUPS() (DEPRECATED)
+
+To retrieve the shipping of a 'Ground Commercial' Package
+weighing 25lbs. sent from 23001 to 24002 this package would
+be called like this:
+
+  #!/usr/local/bin/perl
+  use Business::UPS;
+
+  my ($shipping,$ups_zone,$error) = getUPS(qw/GNDCOM 23001 23002 25/);
+  $error and die "ERROR: $error\n";
+  print "Shipping is \$$shipping\n";
+  print "UPS Zone is $ups_zone\n";
 
 =back
 
