@@ -200,6 +200,15 @@ JSON::PP (core since Perl 5.14)
 =back
 
 
+=head1 ARGUMENTS for UPStrack()
+
+The tracking number. Dies on error (use eval to catch).
+
+  use Business::UPS;
+  my %t = eval { UPStrack("1ZX29W290250xxxxxx") };
+  die "ERROR: $@" if $@;
+  print "This package is $t{'Current Status'}\n";
+
 =head1 ARGUMENTS for getUPS() (DEPRECATED)
 
 B<This function is deprecated.> The UPS endpoint it uses no longer exists.
@@ -304,15 +313,6 @@ Can be one of the following:
 
 
 =back
-
-=head1 ARGUMENTS for UPStrack()
-
-The tracking number. Dies on error (use eval to catch).
-
-  use Business::UPS;
-  my %t = eval { UPStrack("1ZX29W290250xxxxxx") };
-  die "ERROR: $@" if $@;
-  print "This package is $t{'Current Status'}\n";
 
 =head1 RETURN VALUES
 
