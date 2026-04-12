@@ -9,6 +9,7 @@ Makefile.PL
 MANIFEST
 MANIFEST.SKIP
 product-codes.txt
+README
 SECURITY.md
 t/00-load.t
 t/getups.t

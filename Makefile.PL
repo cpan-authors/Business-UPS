@@ -7,7 +7,7 @@ WriteMakefile(
     ABSTRACT_FROM       => 'lib/Business/UPS.pm',
     MIN_PERL_VERSION    => '5.014',
     PL_FILES            => {},
-    ($ExtUtils::MakeMaker::VERSION >= 6.3002 ? ('LICENSE'        => 'perl', ) : ()),
+    LICENSE             => 'perl',
     PREREQ_PM => {
         'LWP::UserAgent' => 0,
         'JSON::PP'       => 0,
@@ -15,7 +15,11 @@ WriteMakefile(
     TEST_REQUIRES => {
         'Test::More'     => 0,
     },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    dist                => {
+        COMPRESS => 'gzip -9f',
+        SUFFIX   => 'gz',
+        PREOP    => 'pod2text $(VERSION_FROM) > README',
+    },
     clean               => { FILES => 'Business-UPS-*' },
     META_MERGE  => {
         'meta-spec' => { version => 2 },
