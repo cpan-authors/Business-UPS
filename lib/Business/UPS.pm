@@ -9,7 +9,8 @@ use JSON::PP qw(decode_json encode_json);
 use Exporter 'import';
 use 5.014;
 
-our @EXPORT = qw/ getUPS UPStrack /;
+our @EXPORT    = qw/ getUPS UPStrack /;
+our @EXPORT_OK = qw/ getUPS UPStrack /;
 
 #	Copyright 2003 Justin Wheeler <upsmodule@datademons.com>
 #	Copyright 1998 Mark Solomon <msolomon@seva.net> (See GNU GPL)
