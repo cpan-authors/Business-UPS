@@ -128,6 +128,28 @@ subtest 'getUPS defaults country to US' => sub {
     like( $captured_url, qr/22_destCountry=US/, 'defaults to US' );
 };
 
+subtest 'getUPS sends to correct UPS endpoint with required params' => sub {
+    my $captured_url;
+    {
+        no warnings 'redefine';
+        *LWP::UserAgent::get = sub {
+            my ( $self, $url ) = @_;
+            $captured_url = $url;
+            return MockResponse->new( success => 1, content => $success_response );
+        };
+    }
+
+    getUPS(qw/GNDCOM 23606 23607 50/);
+
+    like( $captured_url, qr{^https://www\.ups\.com/using/services/rave/qcostcgi\.cgi\?},
+        'uses correct UPS CGI base URL' );
+    like( $captured_url, qr/accept_UPS_license_agreement=yes/, 'includes license agreement' );
+    like( $captured_url, qr/13_product=GNDCOM/,                'product code in URL' );
+    like( $captured_url, qr/15_origPostal=23606/,              'origin zip in URL' );
+    like( $captured_url, qr/19_destPostal=23607/,              'dest zip in URL' );
+    like( $captured_url, qr/23_weight=50/,                     'weight in URL' );
+};
+
 subtest 'getUPS includes oversized and COD flags' => sub {
     my $captured_url;
     {

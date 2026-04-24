@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Test::More;
+use JSON::PP qw(decode_json);
 use Business::UPS;
 
 # Mock LWP::UserAgent to avoid real HTTP requests
@@ -382,6 +383,75 @@ subtest 'UPStrack handles activities with missing fields' => sub {
 subtest 'UPStrack dies on undef tracking number' => sub {
     eval { UPStrack(undef) };
     like( $@, qr/tracking/i, 'dies on undef tracking number' );
+};
+
+# Request format validation — verify outgoing HTTP request is correct
+subtest 'UPStrack sends correct request format' => sub {
+    my ( $captured_url, @captured_args );
+    {
+        no warnings 'redefine';
+        *LWP::UserAgent::post = sub {
+            my ( $self, $url, @args ) = @_;
+            $captured_url  = $url;
+            @captured_args = @args;
+            return MockResponse->new( success => 1, content => $delivered_json );
+        };
+    }
+
+    UPStrack("1Z999AA10123456784");
+
+    # Verify URL
+    is( $captured_url,
+        'https://www.ups.com/track/api/Track/GetStatus?loc=en_US',
+        'posts to correct UPS tracking API endpoint' );
+
+    # Verify Content-Type header
+    my %headers;
+    for ( my $i = 0; $i < $#captured_args; $i += 2 ) {
+        $headers{ $captured_args[$i] } = $captured_args[ $i + 1 ];
+    }
+    is( $headers{'Content-Type'}, 'application/json', 'Content-Type is application/json' );
+
+    # Verify JSON payload structure
+    ok( defined $headers{'Content'}, 'request body is present' );
+    my $payload = decode_json( $headers{'Content'} );
+    is( $payload->{Locale}, 'en_US', 'payload Locale is en_US' );
+    is( ref $payload->{TrackingNumber}, 'ARRAY', 'TrackingNumber is an array' );
+    is_deeply( $payload->{TrackingNumber}, ['1Z999AA10123456784'],
+        'TrackingNumber contains the input tracking number' );
+
+    # Restore normal mock
+    no warnings 'redefine';
+    *LWP::UserAgent::post = sub {
+        my ( $self, $url, @args ) = @_;
+        return shift @mock_responses;
+    };
+};
+
+subtest 'UPStrack passes different tracking numbers correctly' => sub {
+    my $captured_body;
+    {
+        no warnings 'redefine';
+        *LWP::UserAgent::post = sub {
+            my ( $self, $url, @args ) = @_;
+            my %h = @args;
+            $captured_body = $h{'Content'};
+            return MockResponse->new( success => 1, content => $minimal_json );
+        };
+    }
+
+    UPStrack("1ZABC123XYZ");
+
+    my $payload = decode_json($captured_body);
+    is_deeply( $payload->{TrackingNumber}, ['1ZABC123XYZ'],
+        'tracking number passed through to payload' );
+
+    # Restore normal mock
+    no warnings 'redefine';
+    *LWP::UserAgent::post = sub {
+        my ( $self, $url, @args ) = @_;
+        return shift @mock_responses;
+    };
 };
 
 done_testing();
