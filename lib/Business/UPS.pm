@@ -25,51 +25,9 @@ sub getUPS {
         . 'has been retired by UPS. This function will be removed in a future '
         . 'release. See Business::UPS documentation for alternatives.' );
 
-    my (
-        $product, $origin, $dest,      $weight, $country, $rate_chart, $length,
-        $width,   $height, $oversized, $cod
-    ) = @_;
-
-    $country ||= 'US';
-
-    my $ups_cgi    = 'https://www.ups.com/using/services/rave/qcostcgi.cgi';
-    my $workString = "?";
-    $workString .= "accept_UPS_license_agreement=yes&";
-    $workString .= "10_action=3&";
-    $workString .= "13_product=" . $product . "&";
-    $workString .= "15_origPostal=" . $origin . "&";
-    $workString .= "19_destPostal=" . $dest . "&";
-    $workString .= "23_weight=" . $weight;
-    $workString .= "&22_destCountry=" . $country   if $country;
-    $workString .= "&25_length=" . $length         if $length;
-    $workString .= "&26_width=" . $width           if $width;
-    $workString .= "&27_height=" . $height         if $height;
-    $workString .= "&29_oversized=1"               if $oversized;
-    $workString .= "&47_rate_chart=" . $rate_chart if $rate_chart;
-    $workString .= "&30_cod=1"                     if $cod;
-    $workString = "${ups_cgi}${workString}";
-
-    my $lwp    = LWP::UserAgent->new(
-        agent   => "Business-UPS/$VERSION",
-        timeout => 30,
-    );
-    my $result = $lwp->get($workString);
-
-    croak("Failed fetching data.") unless $result->is_success;
-
-    my @ret = split( '%', $result->content );
-
-    if ( !$ret[5] ) {
-
-        # Error
-        return ( undef, undef, $ret[1] );
-    }
-    else {
-        # Good results
-        my $total_shipping = $ret[10];
-        my $ups_zone       = $ret[6];
-        return ( $total_shipping, $ups_zone, undef );
-    }
+    return ( undef, undef,
+        'The UPS rate quoting endpoint (qcostcgi.cgi) has been retired by UPS. '
+        . 'See Business::UPS documentation for alternatives.' );
 }
 
 sub UPStrack {
