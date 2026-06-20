@@ -384,4 +384,30 @@ subtest 'UPStrack dies on undef tracking number' => sub {
     like( $@, qr/tracking/i, 'dies on undef tracking number' );
 };
 
+# Response with BOTH scheduledDeliveryDate and deliveredDate
+my $both_dates_json = <<'JSON';
+{
+  "trackDetails": [
+    {
+      "trackingNumber": "1Z999AA10123456784",
+      "packageStatus": "Delivered",
+      "scheduledDeliveryDate": "Thursday, 01/15/2026",
+      "deliveredDate": "Wednesday, 01/14/2026",
+      "receivedBy": "JONES"
+    }
+  ]
+}
+JSON
+
+subtest 'UPStrack prefers deliveredDate over scheduledDeliveryDate' => sub {
+    @mock_responses = (
+        MockResponse->new( success => 1, content => $both_dates_json ),
+    );
+
+    my %result = UPStrack("1Z999AA10123456784");
+
+    is( $result{'Delivery Date'}, 'Wednesday, 01/14/2026',
+        'actual delivery date wins over scheduled date' );
+};
+
 done_testing();
